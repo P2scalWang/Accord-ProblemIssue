@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Google Fonts -->
     <link
-        href="https://fonts.googles.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap"
         rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -38,7 +38,7 @@
                 }
             }
         }
-    </>
+    </script>
 </head>
 
 <body class="bg-slate-50 text-slate-600 font-sans h-screen flex flex-col overflow-hidden">
@@ -46,7 +46,7 @@
     <div id="loading-fallback" class="fixed inset-0 flex items-center justify-center bg-white z-50">
         <div class="text-center">
             <p class="text-slate-500 mb-2">Connecting to LINE...</p>
-            <no class="text-red-500 text-sm">Please enable Java.</no>
+            <noscript class="text-red-500 text-sm">Please enable JavaScript.</noscript>
         </div>
     </div>
 
@@ -260,7 +260,7 @@
     </div>
 
     <script>
-        const _URL = 'https://script.google.com/macros/s/AKfycbzkGyirXGmwNVUgZjsD5QCXJEeDJ3aoe4ZSyH8Q9O0FXv_GfWecEp_-tftEmpmOgcMCEw/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxnun_T4TejdIOhXZD2WiTqDghKoJ2W3joDwqZmJpPwbdUGSRxXL1U-yPIP8WUwcQsvLQ/exec';
 
         const { createApp, ref, reactive, computed, watch, onMounted } = Vue;
 
@@ -374,7 +374,7 @@
                     };
 
                     try {
-                        const response = await fetch(_URL, {
+                        const response = await fetch(API_URL, {
                             method: 'POST',
                             mode: 'no-cors',
                             headers: {
@@ -398,7 +398,7 @@
 
                 const fetchMyBookings = async (userId) => {
                     try {
-                        const response = await fetch(_URL);
+                        const response = await fetch(API_URL);
                         const data = await response.json();
 
                         // Filter: My UserID + Status 'Approved'
@@ -464,8 +464,9 @@
                             profile.value = await liff.getProfile();
                             form.requester = profile.value.displayName;
 
-                            // FETCH BOOKINGS AFTER LOGIN
-                            await fetchMyBookings(profile.value.userId);
+                            // FETCH BOOKINGS NON-BLOCKING
+                            // Don't await here so UI shows up immediately
+                            fetchMyBookings(profile.value.userId);
 
                         } else {
                             liff.login();
@@ -484,8 +485,10 @@
                         liffReady.value = true;
                     } finally {
                         // Always show app to avoid white screen stuck
-                        document.getElementById('loading-fallback').style.display = 'none';
-                        document.getElementById('app').classList.remove('hidden');
+                        const loader = document.getElementById('loading-fallback');
+                        if (loader) loader.style.display = 'none';
+                        const appEl = document.getElementById('app');
+                        if (appEl) appEl.classList.remove('hidden');
                     }
                 };
 
