@@ -238,7 +238,7 @@
 
         createApp({
             setup() {
-                const Ready = ref(false);
+                const liffReady = ref(false);
                 const profile = ref(null);
                 const submitting = ref(false);
                 const showSuccess = ref(false);
@@ -362,9 +362,16 @@
                 };
 
                 const initLiff = async () => {
+                    const liffTimeout = new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('Timeout')), 5000); // 5 seconds timeout
+                    });
+
                     try {
-                        // Using the provided LIFF ID
-                        await liff.init({ liffId: "2008863808-6cU9sNGm" });
+                        // Using the provided LIFF ID with race condition
+                        await Promise.race([
+                            liff.init({ liffId: "2008863808-6cU9sNGm" }),
+                            liffTimeout
+                        ]);
 
                         if (liff.isLoggedIn()) {
                             profile.value = await liff.getProfile();
@@ -374,14 +381,15 @@
                         }
                         liffReady.value = true;
                     } catch (err) {
-                        console.error('LIFF Init failed', err);
-                        // Fallback logic could go here if needed, but for now we let it fail or alert
-                        alert('LIFF Connection Failed: ' + err.message);
-
-                        // Mock for local testing only if really needed, but user asked to connect LIFF
-                        // profile.value = { displayName: 'Offline User', pictureUrl: '' };
-                        // form.requester = 'Offline User';
-                        // liffReady.value = true;
+                        console.error('LIFF Init failed/timeout', err);
+                        // Fallback: Show app anyway, maybe with dummy data or empty
+                        // Only for local testing or when LIFF fails heavily
+                        profile.value = {
+                            displayName: 'Guest User (LIFF Failed)',
+                            pictureUrl: ''
+                        };
+                        form.requester = profile.value.displayName;
+                        liffReady.value = true;
                     } finally {
                         // Always show app to avoid white screen stuck
                         document.getElementById('loading-fallback').style.display = 'none';
