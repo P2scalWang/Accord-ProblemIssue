@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <!-- Google Fonts -->
     <link
-        href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap"
+        href="https://fonts.googles.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap"
         rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -260,7 +260,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbwke9LNJQeFBwbgmpmUZyS4-QB8ZDqsxe_pRLkeFvykanJ7Y576NpRXcQcFu9l1HHNMbg/exec';
+        const _URL = 'https://script.google.com/macros/s/AKfycbzkGyirXGmwNVUgZjsD5QCXJEeDJ3aoe4ZSyH8Q9O0FXv_GfWecEp_-tftEmpmOgcMCEw/exec';
 
         const { createApp, ref, reactive, computed, watch, onMounted } = Vue;
 
@@ -374,7 +374,7 @@
                     };
 
                     try {
-                        const response = await fetch(API_URL, {
+                        const response = await fetch(_URL, {
                             method: 'POST',
                             mode: 'no-cors',
                             headers: {
@@ -398,7 +398,7 @@
 
                 const fetchMyBookings = async (userId) => {
                     try {
-                        const response = await fetch(API_URL);
+                        const response = await fetch(_URL);
                         const data = await response.json();
 
                         // Filter: My UserID + Status 'Approved'
