@@ -1,634 +1,418 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แบบฟอร์มแจ้งปัญหาสินค้า</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <title>Car Return - คืนรถ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- Vue.js 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bai+Jamjuree:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .container {
-            background: white;
-            max-width: 700px;
-            width: 100%;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .header p {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .form-content {
-            padding: 40px 30px;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .required {
-            color: #e74c3c;
-            margin-left: 3px;
-        }
-
-        input[type="text"],
-        input[type="tel"],
-        input[type="date"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        input[type="text"]:focus,
-        input[type="tel"]:focus,
-        input[type="date"]:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        input[type="file"] {
-            width: 100%;
-            padding: 10px;
-            border: 2px dashed #e0e0e0;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        input[type="file"]:hover {
-            border-color: #667eea;
-            background-color: #f8f9ff;
-        }
-
-        .file-info {
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-
-        .submit-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .success-message {
-            display: none;
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error-message {
-            display: none;
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            border: 1px solid #f5c6cb;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            animation: slideUp 0.3s ease;
-        }
-
-        .modal-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h2 {
-            color: #333;
-            font-size: 22px;
-            margin: 0;
-        }
-
-        .modal-body {
-            margin-bottom: 25px;
-            color: #666;
-            line-height: 1.6;
-        }
-
-        .modal-body p {
-            margin-bottom: 15px;
-        }
-
-        .modal-data {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .modal-data-item {
-            display: flex;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-
-        .modal-data-item strong {
-            color: #333;
-            min-width: 150px;
-        }
-
-        .modal-data-item span {
-            color: #666;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .modal-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .modal-btn-confirm {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .modal-btn-confirm:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .modal-btn-cancel {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        .modal-btn-cancel:hover {
-            background: #d0d0d0;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Bai Jamjuree', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        }
+                    }
+                }
             }
         }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 24px;
-            }
-
-            .form-content {
-                padding: 30px 20px;
-            }
-
-            .modal-content {
-                padding: 20px;
-                width: 95%;
-            }
-
-            .modal-data-item {
-                flex-direction: column;
-            }
-
-            .modal-data-item strong {
-                margin-bottom: 3px;
-            }
-        }
-    </style>
+    </script>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🧾 แบบฟอร์มแจ้งปัญหาสินค้า</h1>
-            <p>กรุณากรอกข้อมูลให้ครบถ้วนเพื่อให้เราสามารถช่วยเหลือคุณได้อย่างรวดเร็ว</p>
-        </div>
 
-        <div class="form-content">
-            <div class="success-message" id="successMessage">
-                ✅ ส่งข้อมูลสำเร็จ! เราจะติดต่อกลับโดยเร็วที่สุด
-            </div>
-
-            <div class="error-message" id="errorMessage">
-                ❌ เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง
-            </div>
-
-            <form id="issueForm">
-                <div class="form-group">
-                    <label>ชื่อบริษัท / ชื่อลูกค้า <span class="required">*</span></label>
-                    <input type="text" name="customerName" required placeholder="กรอกชื่อบริษัทหรือชื่อลูกค้า">
-                </div>
-
-                <div class="form-group">
-                    <label>เบอร์โทรศัพท์ <span class="required">*</span></label>
-                    <input type="tel" name="phone" required placeholder="เช่น 081-234-5678">
-                </div>
-
-                <div class="form-group">
-                    <label>Line ID</label>
-                    <input type="text" name="lineId" placeholder="เช่น @yourlineid">
-                </div>
-
-                <div class="form-group">
-                    <label>ชื่อยี่ห้อสินค้า</label>
-                    <input type="text" name="brand" placeholder="AWOL 3000 pro">
-                </div>
-
-                <div class="form-group">
-                    <label>รุ่นสินค้า</label>
-                    <input type="text" name="model" placeholder="">
-                </div>
-
-                <div class="form-group">
-                    <label>หมายเลขเครื่อง / Serial Number <span class="required">*</span></label>
-                    <input type="text" name="serialNumber" required placeholder="กรอกหมายเลขเครื่อง">
-                </div>
-
-                <div class="form-group">
-                    <label>วันที่ซื้อ หรือ วันที่ติดตั้ง</label>
-                    <input type="date" name="purchaseDate">
-                </div>
-
-                <div class="form-group">
-                    <label>อาการที่พบ <span class="required">*</span></label>
-                    <textarea name="symptoms" required placeholder="อธิบายอาการที่พบ เช่น มีแต่เสียงภาพไม่ขึ้น, สีเพี้ยน, มี dead pixel ฯลฯ"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>แนบภาพหรือวิดีโอประกอบ</label>
-                    <input type="file" name="attachment" accept="image/*,video/*" id="fileInput">
-                    <div class="file-info">รองรับไฟล์รูปภาพและวิดีโอ (เพื่อช่วยตรวจสอบอาการ)</div>
-                </div>
-
-                <div class="form-group">
-                    <label>หมายเหตุเพิ่มเติม (ถ้ามี)</label>
-                    <textarea name="notes" placeholder="ข้อมูลเพิ่มเติมที่ต้องการแจ้ง"></textarea>
-                </div>
-
-                <button type="submit" class="submit-btn" id="submitBtn">
-                    ส่งแบบฟอร์ม
-                </button>
-            </form>
+<body class="bg-slate-50 text-slate-600 font-sans h-screen flex flex-col overflow-hidden">
+    <!-- Fallback if Vue fails -->
+    <div id="loading-fallback" class="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div class="text-center">
+            <p class="text-slate-500 mb-2">Connecting to LINE...</p>
+            <noscript class="text-red-500 text-sm">Please enable JavaScript.</noscript>
         </div>
     </div>
 
-    <!-- Modal ยืนยันการส่งข้อมูล -->
-    <div class="modal" id="confirmModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span style="font-size: 28px;">✅</span>
-                <h2>ยืนยันการส่งข้อมูล</h2>
+    <div id="app" class="flex flex-col h-full max-w-md mx-auto bg-white shadow-2xl relative" v-show="liffReady">
+
+        <!-- Header -->
+        <header
+            class="bg-white px-6 py-5 border-b border-slate-100 flex items-center justify-between sticky top-0 z-30">
+            <div>
+                <h1 class="font-heading text-2xl font-bold text-slate-800">Return Car</h1>
+                <p class="text-xs text-slate-400 font-medium tracking-wide">แจ้งคืนรถบริษัท</p>
             </div>
-            <div class="modal-body">
-                <p>กรุณาตรวจสอบข้อมูลของคุณก่อนส่ง:</p>
-                <div class="modal-data" id="modalData"></div>
+            <div v-if="profile" class="w-10 h-10 rounded-full border-2 border-brand-100 overflow-hidden">
+                <img :src="profile.pictureUrl" alt="Profile" class="w-full h-full object-cover">
             </div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-cancel" id="cancelBtn">ยกเลิก</button>
-                <button class="modal-btn modal-btn-confirm" id="confirmBtn">ยืนยันและส่ง</button>
+            <div v-else class="w-10 h-10 rounded-full bg-slate-200 animate-pulse"></div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-6 space-y-6 pb-28">
+            <div class="space-y-6">
+                <!-- 1. Requester Info -->
+                <section>
+                    <label
+                        class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">ผู้แจ้งคืน</label>
+                    <input type="text" v-model="form.requester"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                </section>
+
+                <!-- 2. Car Selection -->
+                <section>
+                    <label
+                        class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">เลือกรถที่คืน</label>
+                    <div class="relative">
+                        <select v-model="form.carId" @change="onCarSelect"
+                            class="w-full appearance-none bg-white border border-slate-200 rounded-xl px-4 py-3 pr-10 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
+                            <option :value="null" disabled>กรุณาเลือกรถ</option>
+                            <option v-for="car in cars" :key="car.id" :value="car.id">
+                                {{ car.plate }} - {{ car.model }} ({{ car.color }})
+                            </option>
+                        </select>
+                        <i
+                            class="fa-solid fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+                    <!-- Car Type Badge -->
+                    <div v-if="selectedCar" class="mt-2 flex gap-2">
+                        <span
+                            :class="['text-[10px] px-2 py-1 rounded-md font-bold uppercase tracking-wide border', 
+                            selectedCar.type === 'EV' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-orange-50 text-orange-600 border-orange-100']">
+                            <i
+                                :class="selectedCar.type === 'EV' ? 'fa-solid fa-bolt mr-1' : 'fa-solid fa-gas-pump mr-1'"></i>
+                            {{ selectedCar.type }}
+                        </span>
+                    </div>
+                </section>
+
+                <!-- 3. Usage Type -->
+                <section>
+                    <label
+                        class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">ประเภทการใช้งาน</label>
+                    <div class="grid grid-cols-2 gap-4 h-[200px]">
+                        <label class="cursor-pointer block">
+                            <input type="radio" v-model="form.useType" value="Work" class="peer sr-only">
+                            <div
+                                class="h-full flex flex-col items-center justify-center rounded-2xl border-2 border-slate-200 p-6 text-center transition-all peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:text-brand-700 hover:border-brand-300 shadow-sm">
+                                <i class="fa-solid fa-briefcase text-4xl mb-3 block"></i>
+                                <span class="text-base font-bold">ใช้ทำงาน</span>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer block">
+                            <input type="radio" v-model="form.useType" value="Personal" class="peer sr-only">
+                            <div
+                                class="h-full flex flex-col items-center justify-center rounded-2xl border-2 border-slate-200 p-6 text-center transition-all peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:text-brand-700 hover:border-brand-300 shadow-sm">
+                                <i class="fa-solid fa-user text-4xl mb-3 block"></i>
+                                <span class="text-base font-bold">ส่วนตัว</span>
+                            </div>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- 4. Mileage / Stats (Always Rendered, Hidden when Work) -->
+                <section
+                    class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-5 transition-all duration-300 overflow-hidden"
+                    :class="form.useType === 'Personal' ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 p-0 border-0'">
+                    <div class="flex items-center gap-2 text-brand-600 mb-2">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <h3 class="text-sm font-bold">ข้อมูลการใช้งาน (ส่วนตัว)</h3>
+                    </div>
+
+                    <!-- Odometer -->
+                    <div v-show="selectedCar?.type === 'Fuel' || !selectedCar">
+                        <label class="text-xs font-semibold text-slate-500 mb-1 block">เลขไมล์ (Odometer)</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <input type="number" v-model="form.odoBefore" placeholder="ก่อนใช้"
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <input type="number" v-model="form.odoAfter" placeholder="หลังใช้"
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-brand-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Battery (For EV) -->
+                    <div v-show="selectedCar?.type === 'EV'">
+                        <label class="text-xs font-semibold text-slate-500 mb-1 block">แบตเตอรี่ (%)</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <input type="number" v-model="form.batteryBefore" placeholder="ก่อนใช้ %"
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-brand-500">
+                            </div>
+                            <div>
+                                <input type="number" v-model="form.batteryAfter" placeholder="หลังใช้ %"
+                                    class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-brand-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
+                        <div class="flex justify-between items-center text-sm font-medium text-slate-600">
+                            <span>ระยะทางที่ใช้</span>
+                            <span class="font-bold font-mono">{{ calculatedDistance }} km</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm font-medium text-slate-600 mt-1">
+                            <span>ค่าชดเชย ({{ form.fuelRate }} THB/km)</span>
+                            <span class="font-bold font-mono text-brand-600">{{ calculatedReimburse }} THB</span>
+                        </div>
+                    </div>
+
+                    <!-- Photo Uploads -->
+                    <div class="space-y-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">รูปเลขไมล์ / แบตเตอรี่
+                                (ก่อนใช้)</label>
+                            <input type="file" @change="handleFile($event, 'before')" accept="image/*"
+                                class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+                                :disabled="form.useType !== 'Personal'">
+                            <p v-if="fileNames.before" class="text-[10px] text-green-500 mt-1"><i
+                                    class="fa-solid fa-check mr-1"></i>Selected: {{ fileNames.before }}</p>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-400 uppercase mb-2 block">รูปเลขไมล์ / แบตเตอรี่
+                                (หลังใช้)</label>
+                            <input type="file" @change="handleFile($event, 'after')" accept="image/*"
+                                class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-brand-50 file:text-brand-700 hover:file:bg-brand-100"
+                                :disabled="form.useType !== 'Personal'">
+                            <p v-if="fileNames.after" class="text-[10px] text-green-500 mt-1"><i
+                                    class="fa-solid fa-check mr-1"></i>Selected: {{ fileNames.after }}</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Footer Action -->
+        <footer class="bg-white border-t border-slate-200 p-4 absolute bottom-0 left-0 right-0 z-30">
+            <button @click="submitReturn" :disabled="!isValid || submitting" :class="['w-full py-4 rounded-xl font-bold text-sm tracking-wide shadow-lg flex items-center justify-center gap-2 transition-all',
+                    isValid && !submitting
+                    ? 'bg-slate-800 text-white shadow-slate-500/30 hover:bg-slate-900 active:scale-[0.98]' 
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed shadow-none']">
+                <span v-if="submitting"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Sending...</span>
+                <span v-else>Confirm Return</span>
+            </button>
+        </footer>
+
+        <!-- Success Modal -->
+        <div v-if="showSuccess"
+            class="absolute inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-6 animate-fade-in">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-sm text-center">
+                <div
+                    class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500 text-2xl">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 mb-2">Success!</h3>
+                <p class="text-sm text-slate-500 mb-6">บันทึกข้อมูลการคืนรถเรียบร้อย</p>
+                <button @click="closeWindow"
+                    class="w-full py-3 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-200">Close</button>
             </div>
         </div>
+
     </div>
 
     <script>
-        const form = document.getElementById('issueForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const successMessage = document.getElementById('successMessage');
-        const errorMessage = document.getElementById('errorMessage');
-        const fileInput = document.getElementById('fileInput');
-        const confirmModal = document.getElementById('confirmModal');
-        const modalData = document.getElementById('modalData');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const confirmBtn = document.getElementById('confirmBtn');
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz6o4K22hLOKYf6CRdznanyi-sm6zJcuoihYG2CbXexcmFoI-uhy8DgHR2IhEdqjB9kUA/exec';
 
-        let formDataToSend = null;
+        const { createApp, ref, reactive, computed, watch, onMounted } = Vue;
 
-        // ใส่ Webhook URL ของคุณที่นี่
-        const WEBHOOK_URL = 'https://n8n.srv1038568.hstgr.cloud/webhook/Productissuereport';
+        createApp({
+            setup() {
+                const liffReady = ref(false);
+                const profile = ref(null);
+                const submitting = ref(false);
+                const showSuccess = ref(false);
 
-        // เมื่อกดส่งฟอร์ม - แสดง Modal ยืนยัน
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+                const cars = [
+                    { id: 1, plate: 'ญช 908 กท', model: 'Cap', color: 'สีขาว', type: 'Fuel' },
+                    { id: 2, plate: 'ฎฮ 9043 กท', model: 'Optra', color: 'สีดำ', type: 'Fuel' },
+                    { id: 3, plate: '1ขท 3650 กท', model: 'Optra', color: 'สีเทา', type: 'Fuel' },
+                    { id: 4, plate: 'สท 4690 กท', model: 'Optra', color: 'สีขาว', type: 'Fuel' },
+                    { id: 5, plate: '3ขช 2404 กท', model: 'Optra', color: 'สีเงิน', type: 'Fuel' },
+                    { id: 6, plate: '3ขช 3222 กท', model: 'Cap', color: 'สีน้ำตาล', type: 'Fuel' },
+                    { id: 7, plate: 'บ 3004 กท', model: 'MG4', color: 'สีขาว', type: 'EV' },
+                    { id: 8, plate: 'ฮ 2227 กท', model: 'MG4', color: 'สีเทา', type: 'EV' }
+                ];
 
-            // ซ่อนข้อความก่อนหน้า
-            successMessage.style.display = 'none';
-            errorMessage.style.display = 'none';
+                const form = reactive({
+                    requester: '',
+                    carId: null,
+                    useType: 'Work',
+                    odoBefore: '',
+                    odoAfter: '',
+                    batteryBefore: '',
+                    batteryAfter: '',
+                    fuelRate: 3.5,
+                    photos: {
+                        before: null,
+                        after: null
+                    }
+                });
 
-            // เตรียมข้อมูล
-            const formData = new FormData(form);
-            
-            // จัดการไฟล์แนบ
-            const file = fileInput.files[0];
-            let fileInfo = null;
-            
-            if (file) {
-                fileInfo = {
-                    filename: file.name,
-                    filesize: file.size,
-                    filetype: file.type
+                const fileNames = reactive({ before: '', after: '' });
+
+                const selectedCar = computed(() => cars.find(c => c.id === form.carId));
+
+                const calculatedDistance = computed(() => {
+                    if (form.odoAfter && form.odoBefore) {
+                        return Math.max(0, form.odoAfter - form.odoBefore);
+                    }
+                    return 0;
+                });
+
+                const calculatedReimburse = computed(() => {
+                    return (calculatedDistance.value * form.fuelRate).toFixed(2);
+                });
+
+                const isValid = computed(() => {
+                    if (!form.requester || !form.carId) return false;
+
+                    if (form.useType === 'Personal') {
+                        if (selectedCar.value?.type === 'EV') {
+                            if (!form.batteryBefore || !form.batteryAfter) return false;
+                        } else {
+                            if (!form.odoBefore || !form.odoAfter) return false;
+                        }
+                        if (!form.photos.before || !form.photos.after) return false;
+                    }
+
+                    return true;
+                });
+
+                const onCarSelect = () => {
+                    // Reset fields if needed when car changes
+                };
+
+                const handleFile = (event, type) => {
+                    const file = event.target.files[0];
+                    if (file) {
+                        fileNames[type] = file.name;
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            form.photos[type] = e.target.result.split(',')[1];
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+
+                const submitReturn = async () => {
+                    if (!isValid.value) return;
+                    submitting.value = true;
+
+                    const payload = {
+                        action: 'return_car',
+                        requester: form.requester,
+                        carId: selectedCar.value.id,
+                        carPlate: selectedCar.value.plate,
+                        carModel: selectedCar.value.model,
+                        carType: selectedCar.value.type,
+                        useType: form.useType,
+                        odoBefore: form.odoBefore,
+                        odoAfter: form.odoAfter,
+                        batBefore: form.batteryBefore,
+                        batAfter: form.batteryAfter,
+                        fuelRate: form.fuelRate,
+                        distance: calculatedDistance.value,
+                        reimburse: calculatedReimburse.value,
+                        photoBefore: form.photos.before || '',
+                        photoAfter: form.photos.after || ''
+                    };
+
+                    try {
+                        const response = await fetch(API_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(payload)
+                        });
+
+                        showSuccess.value = true;
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('Submission failed. Please try again.');
+                    } finally {
+                        submitting.value = false;
+                    }
+                };
+
+                const closeWindow = () => {
+                    window.location.reload();
+                };
+
+                const initLiff = async () => {
+                    try {
+                        // Using the provided LIFF ID
+                        await liff.init({ liffId: "2008863808-e2MCAccQ" });
+
+                        if (liff.isLoggedIn()) {
+                            profile.value = await liff.getProfile();
+                            form.requester = profile.value.displayName;
+                        } else {
+                            liff.login();
+                        }
+                        liffReady.value = true;
+                    } catch (err) {
+                        console.error('LIFF Init failed', err);
+                        // Fallback logic could go here if needed, but for now we let it fail or alert
+                        alert('LIFF Connection Failed: ' + err.message);
+
+                        // Mock for local testing only if really needed, but user asked to connect LIFF
+                        // profile.value = { displayName: 'Offline User', pictureUrl: '' };
+                        // form.requester = 'Offline User';
+                        // liffReady.value = true;
+                    } finally {
+                        // Always show app to avoid white screen stuck
+                        document.getElementById('loading-fallback').style.display = 'none';
+                        document.getElementById('app').classList.remove('hidden');
+                    }
+                };
+
+                onMounted(() => {
+                    initLiff();
+                });
+
+                return {
+                    liffReady,
+                    profile,
+                    form,
+                    cars,
+                    selectedCar,
+                    isValid,
+                    submitting,
+                    showSuccess,
+                    fileNames,
+                    onCarSelect,
+                    handleFile,
+                    submitReturn,
+                    closeWindow,
+                    calculatedDistance,
+                    calculatedReimburse
                 };
             }
-
-            // เก็บข้อมูลไว้ส่งภายหลัง (ไม่รวมไฟล์ก่อน)
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                if (key !== 'attachment') {
-                    data[key] = value;
-                }
-            }
-            
-            if (fileInfo) {
-                data.attachment = fileInfo;
-            }
-
-            formDataToSend = { data, file };
-
-            // แสดงข้อมูลใน Modal
-            displayDataInModal(data);
-
-            // แสดง Modal
-            confirmModal.classList.add('show');
-        });
-
-        // ปุ่มยกเลิก
-        cancelBtn.addEventListener('click', () => {
-            confirmModal.classList.remove('show');
-            formDataToSend = null;
-        });
-
-        // คลิกนอก Modal เพื่อปิด
-        confirmModal.addEventListener('click', (e) => {
-            if (e.target === confirmModal) {
-                confirmModal.classList.remove('show');
-                formDataToSend = null;
-            }
-        });
-
-        // ====== ปุ่มยืนยันและส่ง (แก้เฉพาะโครงสร้าง output ไปที่ Webhook) ======
-        confirmBtn.addEventListener('click', async () => {
-            if (!formDataToSend) return;
-
-            // ปิด Modal
-            confirmModal.classList.remove('show');
-
-            // ปิดการใช้งานปุ่ม
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'กำลังส่ง...';
-
-            const { data, file } = formDataToSend;
-
-            // helper
-            const normalizePhone = (s) => (s ? String(s).replace(/[^\d]/g, '') : '');
-            const toDateISOFromThaiDateInput = (d) => {
-                if (!d) return null;
-                // input type="date" เป็น 'YYYY-MM-DD' ใส่ +07:00 แล้วแปลง ISO (UTC)
-                return new Date(`${d}T00:00:00+07:00`).toISOString();
-            };
-
-            // ===== สร้าง payload มาตรฐาน =====
-            const payload = {
-                type: "ProductIssueReport",
-                meta: {
-                    form_id: "issueForm.v1",
-                    submitted_at_iso: new Date().toISOString(),   // เวลา UTC ISO
-                    timezone: "Asia/Bangkok",
-                    user_agent: navigator.userAgent,
-                    page_url: location.href
-                },
-                customer: {
-                    name: (data.customerName || '').trim(),
-                    phone: normalizePhone(data.phone),
-                    line_id: (data.lineId || '').trim()
-                },
-                product: {
-                    brand: (data.brand || '').trim(),
-                    model: (data.model || '').trim(),
-                    serial_number: (data.serialNumber || '').trim(),
-                    purchase_date_raw: data.purchaseDate || null,
-                    purchase_date_iso: toDateISOFromThaiDateInput(data.purchaseDate)
-                },
-                issue: {
-                    symptoms: (data.symptoms || '').trim(),
-                    notes: (data.notes || '').trim()
-                },
-                attachment_meta: data.attachment ? {
-                    filename: data.attachment.filename,
-                    size: data.attachment.filesize,
-                    mime: data.attachment.filetype
-                } : null
-            };
-
-            try {
-                if (file) {
-                    // มีไฟล์ → multipart/form-data
-                    const mf = new FormData();
-                    mf.append('payload', JSON.stringify(payload)); // JSON อยู่คีย์ 'payload'
-                    mf.append('attachment', file, file.name);      // ไฟล์อยู่คีย์ 'attachment'
-
-                    const response = await fetch(WEBHOOK_URL, {
-                        method: 'POST',
-                        body: mf
-                    });
-                    if (!response.ok) throw new Error('Response not OK');
-                } else {
-                    // ไม่มีไฟล์ → JSON ตรง ๆ
-                    const response = await fetch(WEBHOOK_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error('Response not OK');
-                }
-
-                // แสดงข้อความสำเร็จ
-                successMessage.style.display = 'block';
-                form.reset();
-                formDataToSend = null;
-                successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-            } catch (error) {
-                console.error('Error:', error);
-                errorMessage.style.display = 'block';
-                errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'ส่งแบบฟอร์ม';
-            }
-        });
-        // ====== จบส่วนที่แก้เฉพาะ output webhook ======
-
-        // ฟังก์ชันแสดงข้อมูลใน Modal (เดิม)
-        function displayDataInModal(data) {
-            const fieldNames = {
-                customerName: 'ชื่อบริษัท / ชื่อลูกค้า',
-                phone: 'เบอร์โทรศัพท์',
-                lineId: 'Line ID',
-                brand: 'ชื่อยี่ห้อสินค้า',
-                model: 'รุ่นสินค้า',
-                serialNumber: 'หมายเลขเครื่อง',
-                purchaseDate: 'วันที่ซื้อ / วันที่ติดตั้ง',
-                symptoms: 'อาการที่พบ',
-                notes: 'หมายเหตุเพิ่มเติม'
-            };
-
-            let html = '';
-            
-            for (let key in fieldNames) {
-                if (data[key]) {
-                    html += `
-                        <div class="modal-data-item">
-                            <strong>${fieldNames[key]}:</strong>
-                            <span>${data[key]}</span>
-                        </div>
-                    `;
-                }
-            }
-
-            if (data.attachment) {
-                html += `
-                    <div class="modal-data-item">
-                        <strong>ไฟล์แนบ:</strong>
-                        <span>${data.attachment.filename} (${formatFileSize(data.attachment.filesize)})</span>
-                    </div>
-                `;
-            }
-
-            modalData.innerHTML = html;
-        }
-
-        // ฟังก์ชันแปลงขนาดไฟล์ (เดิม)
-        function formatFileSize(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
-            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
-        }
+        }).mount('#app');
     </script>
 </body>
+
 </html>
