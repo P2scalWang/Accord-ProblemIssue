@@ -84,8 +84,12 @@
                         <select v-model="form.carId" @change="onCarSelect"
                             class="w-full appearance-none bg-white border border-slate-200 rounded-xl px-4 py-3 pr-10 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent">
                             <option :value="null" disabled>กรุณาเลือกรถ</option>
-                            <option v-for="car in cars" :key="car.id" :value="car.id">
-                                {{ car.plate }} - {{ car.model }} ({{ car.color }})
+
+                            <!-- If loading or no bookings -->
+                            <option v-if="selectableCars.length === 0" disabled>-- ไม่มีการจองที่อนุมัติ --</option>
+
+                            <option v-for="car in selectableCars" :key="car.id" :value="car.id">
+                                {{ car.displayLabel }}
                             </option>
                         </select>
                         <i
@@ -271,7 +275,14 @@
 
                 const fileNames = reactive({ before: '', after: '' });
 
-                const selectedCar = computed(() => cars.find(c => c.id === form.carId));
+                // Dynamic list of cars based on user bookings
+                const selectableCars = ref([]);
+
+                // Computed: Find the selected car details from our selectable list OR fallback to static list if needed
+                // But stricter is better: find in selectableCars
+                const selectedCar = computed(() => {
+                    return selectableCars.value.find(c => c.id === form.carId) || cars.find(c => c.id === form.carId);
+                });
 
                 const calculatedDistance = computed(() => {
                     if (form.odoAfter && form.odoBefore) {
@@ -361,6 +372,45 @@
                     window.location.reload();
                 };
 
+                const fetchMyBookings = async (userId) => {
+                    try {
+                        const response = await fetch(API_URL);
+                        const data = await response.json();
+
+                        // Filter: My UserID + Status 'Approved'
+                        const myApproved = data.filter(b => b.userId === userId && b.status === 'Approved');
+
+                        // Map to selectable options by combining with static car definitions for details
+                        // Booking has: carPlate, carModel. We need to find the matching 'static' car to get its ID, Type, Color
+
+                        const options = [];
+
+                        myApproved.forEach(booking => {
+                            // Find car details in our static database based on Plate
+                            // Static cars array: { id, plate, model, color, type }
+                            const carDetails = cars.find(c => c.plate === booking.carPlate);
+
+                            if (carDetails) {
+                                options.push({
+                                    ...carDetails, // id, plate, model, color, type
+                                    bookingId: booking.id, // Keep track of booking ID if needed
+                                    displayLabel: `${carDetails.plate} - ${carDetails.model} (${carDetails.color})`
+                                });
+                            }
+                        });
+
+                        // Log for debugging
+                        console.log('My Approved Bookings:', myApproved);
+                        console.log('Selectable Options:', options);
+
+                        selectableCars.value = options;
+
+                    } catch (err) {
+                        console.error('Failed to fetch bookings', err);
+                        // Fallback? Or just leave empty
+                    }
+                };
+
                 const initLiff = async () => {
                     const liffTimeout = new Promise((_, reject) => {
                         setTimeout(() => reject(new Error('Timeout')), 5000); // 5 seconds timeout
@@ -376,17 +426,22 @@
                         if (liff.isLoggedIn()) {
                             profile.value = await liff.getProfile();
                             form.requester = profile.value.displayName;
+
+                            // FETCH BOOKINGS AFTER LOGIN
+                            await fetchMyBookings(profile.value.userId);
+
                         } else {
                             liff.login();
                         }
                         liffReady.value = true;
                     } catch (err) {
                         console.error('LIFF Init failed/timeout', err);
-                        // Fallback: Show app anyway, maybe with dummy data or empty
-                        // Only for local testing or when LIFF fails heavily
+
+                        // Fallback: Show app anyway
                         profile.value = {
                             displayName: 'Guest User (LIFF Failed)',
-                            pictureUrl: ''
+                            pictureUrl: '',
+                            userId: 'U_MOCK_ID' // For testing fetch if needed, currently won't match anything
                         };
                         form.requester = profile.value.displayName;
                         liffReady.value = true;
@@ -416,7 +471,8 @@
                     submitReturn,
                     closeWindow,
                     calculatedDistance,
-                    calculatedReimburse
+                    calculatedReimburse,
+                    selectableCars
                 };
             }
         }).mount('#app');
