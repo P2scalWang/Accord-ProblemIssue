@@ -131,34 +131,21 @@
                     </div>
                 </section>
 
-                <!-- 3. Usage Type -->
+                <!-- 3. Usage Type (Personal Only) -->
                 <section>
                     <label
                         class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">ประเภทการใช้งาน</label>
-                    <div class="grid grid-cols-2 gap-4 h-[200px]">
-                        <label class="cursor-pointer block">
-                            <input type="radio" v-model="form.useType" value="Work" class="peer sr-only">
-                            <div
-                                class="h-full flex flex-col items-center justify-center rounded-2xl border-2 border-slate-200 p-6 text-center transition-all peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:text-brand-700 hover:border-brand-300 shadow-sm">
-                                <i class="fa-solid fa-briefcase text-4xl mb-3 block"></i>
-                                <span class="text-base font-bold">ใช้ทำงาน</span>
-                            </div>
-                        </label>
-                        <label class="cursor-pointer block">
-                            <input type="radio" v-model="form.useType" value="Personal" class="peer sr-only">
-                            <div
-                                class="h-full flex flex-col items-center justify-center rounded-2xl border-2 border-slate-200 p-6 text-center transition-all peer-checked:border-brand-500 peer-checked:bg-brand-50 peer-checked:text-brand-700 hover:border-brand-300 shadow-sm">
-                                <i class="fa-solid fa-user text-4xl mb-3 block"></i>
-                                <span class="text-base font-bold">ส่วนตัว</span>
-                            </div>
-                        </label>
+                    <div class="flex justify-center">
+                        <div
+                            class="flex flex-col items-center justify-center rounded-2xl border-2 border-brand-500 bg-brand-50 p-6 text-center shadow-sm w-full max-w-[200px]">
+                            <i class="fa-solid fa-user text-4xl mb-3 block text-brand-700"></i>
+                            <span class="text-base font-bold text-brand-700">ส่วนตัว</span>
+                        </div>
                     </div>
                 </section>
 
-                <!-- 4. Mileage / Stats (Always Rendered, Hidden when Work) -->
-                <section
-                    class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-5 transition-all duration-300 overflow-hidden"
-                    :class="form.useType === 'Personal' ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 p-0 border-0'">
+                <!-- 4. Mileage / Stats (Always shown for Personal) -->
+                <section class="bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-5">
                     <div class="flex items-center gap-2 text-brand-600 mb-2">
                         <i class="fa-solid fa-circle-exclamation"></i>
                         <h3 class="text-sm font-bold">ข้อมูลการใช้งาน (ส่วนตัว)</h3>
@@ -260,7 +247,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzeQrA8bac1EJOd6edIlry3dVv1k6n1l8J3TpwtqO0BkDDTiXnEra963fnW9dgkfmgNIA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbw47FbT5A8HdLHw3D0qM5ZpaNBdpy6sAaIdQJbKYopUoB3_e_9ZJaxgeb_M7DtkreaBtQ/exec';
 
         const { createApp, ref, reactive, computed, watch, onMounted } = Vue;
 
@@ -285,7 +272,7 @@
                 const form = reactive({
                     requester: '',
                     carId: null,
-                    useType: 'Work',
+                    useType: 'Personal',
                     odoBefore: '',
                     odoAfter: '',
                     batteryBefore: '',
@@ -401,8 +388,12 @@
                         const response = await fetch(API_URL);
                         const data = await response.json();
 
-                        // Filter: My UserID + Status 'Approved'
-                        const myApproved = data.filter(b => b.userId === userId && b.status === 'Approved');
+                        // Filter: My UserID + Status 'Approved' + Personal use only (purpose contains "[ส่วนตัว]")
+                        const myApproved = data.filter(b =>
+                            b.userId === userId &&
+                            b.status === 'Approved' &&
+                            b.purpose && b.purpose.includes('[ส่วนตัว]')
+                        );
 
                         // Map to selectable options by combining with static car definitions for details
                         // Booking has: carPlate, carModel. We need to find the matching 'static' car to get its ID, Type, Color
