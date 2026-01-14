@@ -18,6 +18,37 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Firebase SDK (Compat version for global access) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyD-TuQPqyEsZClt6wnWcUlC17CdCs0_nhY",
+            authDomain: "carrentproject-4577f.firebaseapp.com",
+            databaseURL: "https://carrentproject-4577f-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "carrentproject-4577f",
+            storageBucket: "carrentproject-4577f.firebasestorage.app",
+            messagingSenderId: "603571974820",
+            appId: "1:603571974820:web:c700db38d695cf14936c31",
+            measurementId: "G-D74CK04G3Y"
+        };
+
+        // Initialize Firebase
+        const firebaseApp = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Expose to global scope for Vue.js usage
+        window.firebaseDB = database;
+        window.firebaseRef = (db, path) => db.ref(path);
+        window.firebasePush = (ref, data) => ref.push(data);
+        window.firebaseSet = (ref, data) => ref.set(data);
+        window.firebaseUpdate = (ref, data) => ref.update(data);
+        window.firebaseGet = (ref) => ref.once('value');
+
+        console.log('✅ Firebase initialized successfully');
+    </script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -247,14 +278,14 @@
     </div>
 
     <script>
-         API_URL = 'https://script.google.com/macros/s/AKfycbzqe0f4Aoh-4quFWx7ZIbQZR3m1bwygCO6yhcblSH2_RiRu7hEcT8bKfbeHauZPh5te/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbzqe0f4Aoh-4quFWx7ZIbQZR3m1bwygCO6yhcblSH2_RiRu7hEcT8bKfbeHauZPh5te/exec';
 
-         { createApp, ref, reactive, computed, watch, onMounted } = Vue;
+        const { createApp, ref, reactive, computed, watch, onMounted } = Vue;
 
         createApp({
             setup() {
-                 liffReady = ref(false);
-                 profile = ref(null);
+                const liffReady = ref(false);
+                const profile = ref(null);
                 const submitting = ref(false);
                 const showSuccess = ref(false);
 
@@ -371,6 +402,56 @@
                             },
                             body: JSON.stringify(payload)
                         });
+
+                        // ============================================
+                        // PUSH TO FIREBASE REALTIME DATABASE
+                        // ============================================
+                        if (window.firebaseDB && window.firebasePush && window.firebaseRef) {
+                            try {
+                                // 1. Save return data to /returns
+                                const returnsRef = window.firebaseRef(window.firebaseDB, 'returns');
+                                await window.firebasePush(returnsRef, {
+                                    bookingId: selectedCar.value.bookingId,
+                                    requester: form.requester,
+                                    carId: selectedCar.value.id,
+                                    carPlate: selectedCar.value.plate,
+                                    carModel: selectedCar.value.model,
+                                    carType: selectedCar.value.type,
+                                    useType: form.useType,
+                                    odoBefore: form.odoBefore || null,
+                                    odoAfter: form.odoAfter || null,
+                                    batteryBefore: form.batteryBefore || null,
+                                    batteryAfter: form.batteryAfter || null,
+                                    fuelRate: form.fuelRate,
+                                    distance: calculatedDistance.value,
+                                    reimburse: calculatedReimburse.value,
+                                    status: 'Returned',
+                                    returnedAt: new Date().toISOString()
+                                });
+                                console.log('✅ Firebase: Return saved successfully');
+
+                                // 2. Update booking status to Returned in /bookings
+                                if (selectedCar.value.bookingId && window.firebaseQuery && window.firebaseGet) {
+                                    const bookingsRef = window.firebaseRef(window.firebaseDB, 'bookings');
+                                    const bookingQuery = window.firebaseQuery(
+                                        bookingsRef,
+                                        window.firebaseOrderByChild('bookingId'),
+                                        window.firebaseEqualTo(selectedCar.value.bookingId)
+                                    );
+                                    const snapshot = await window.firebaseGet(bookingQuery);
+                                    if (snapshot.exists()) {
+                                        snapshot.forEach((child) => {
+                                            const bookingRef = window.firebaseRef(window.firebaseDB, `bookings/${child.key}`);
+                                            window.firebaseUpdate(bookingRef, { status: 'Returned' });
+                                            console.log('✅ Firebase: Booking status updated to Returned');
+                                        });
+                                    }
+                                }
+                            } catch (firebaseError) {
+                                console.error('❌ Firebase error:', firebaseError);
+                                // Continue even if Firebase fails
+                            }
+                        }
 
                         showSuccess.value = true;
                     } catch (error) {
