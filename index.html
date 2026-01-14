@@ -431,21 +431,22 @@
                                 console.log('✅ Firebase: Return saved successfully');
 
                                 // 2. Update booking status to Returned in /bookings
-                                if (selectedCar.value.bookingId && window.firebaseQuery && window.firebaseGet) {
-                                    const bookingsRef = window.firebaseRef(window.firebaseDB, 'bookings');
-                                    const bookingQuery = window.firebaseQuery(
-                                        bookingsRef,
-                                        window.firebaseOrderByChild('bookingId'),
-                                        window.firebaseEqualTo(selectedCar.value.bookingId)
-                                    );
-                                    const snapshot = await window.firebaseGet(bookingQuery);
-                                    if (snapshot.exists()) {
-                                        snapshot.forEach((child) => {
-                                            const bookingRef = window.firebaseRef(window.firebaseDB, `bookings/${child.key}`);
-                                            window.firebaseUpdate(bookingRef, { status: 'Returned' });
-                                            console.log('✅ Firebase: Booking status updated to Returned');
-                                        });
-                                    }
+                                // Find booking by bookingId and update status
+                                const bookingsRef = window.firebaseRef(window.firebaseDB, 'bookings');
+                                const snapshot = await window.firebaseGet(bookingsRef);
+                                if (snapshot.exists()) {
+                                    snapshot.forEach((child) => {
+                                        const booking = child.val();
+                                        // Match by carPlate since we have that info
+                                        if (booking.carPlate === selectedCar.value.plate && booking.status === 'Approved') {
+                                            const bookingUpdateRef = window.firebaseRef(window.firebaseDB, `bookings/${child.key}`);
+                                            window.firebaseUpdate(bookingUpdateRef, {
+                                                status: 'Returned',
+                                                returnedAt: new Date().toISOString()
+                                            });
+                                            console.log('✅ Firebase: Booking status updated to Returned for key:', child.key);
+                                        }
+                                    });
                                 }
                             } catch (firebaseError) {
                                 console.error('❌ Firebase error:', firebaseError);
