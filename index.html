@@ -247,7 +247,7 @@
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbzRtc_AzAhgd3UurYuDKk4wR_YD_4aNibYUfi5XwcoYS7l7N1YmLpAl51MPdfjB7KmRCA/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwspRaeQhGIW6AO5ZK33Uk2euUKLkVATJEi0PQoH27VodPSV8A8jvpbd6_G1vwbcyMW5Q/exec';
 
         const { createApp, ref, reactive, computed, watch, onMounted } = Vue;
 
@@ -344,6 +344,8 @@
                     const payload = {
                         action: 'return_car',
                         requester: form.requester,
+                        bookingId: selectedCar.value.bookingId, // For updating Bookings status
+                        sheetRow: selectedCar.value.sheetRow, // Row number for direct update
                         carId: selectedCar.value.id,
                         carPlate: selectedCar.value.plate,
                         carModel: selectedCar.value.model,
@@ -409,6 +411,7 @@
                                 options.push({
                                     ...carDetails, // id, plate, model, color, type
                                     bookingId: booking.id, // Keep track of booking ID if needed
+                                    sheetRow: booking.sheetRow, // Row number in Bookings sheet for easy update
                                     start: booking.start,
                                     end: booking.end,
                                     displayLabel: `${carDetails.plate} - ${carDetails.model} (${carDetails.color})`
