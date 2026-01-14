@@ -247,13 +247,13 @@
     </div>
 
     <script>
-         API_URL = 'https://script.google.com/macros/s/AKfycbwk3qmXlcqK0QpC143Pl2EsIjA7DQc1Wy-hRqlKUq0WABFqf8TkPyImD5-Q-KUew4XKaA/exec';
+         API_URL = 'https://script.google.com/macros/s/AKfycbyGGT5cjy3UGjtpBOI3f0FzB5MAT-0RVdvsdxIH8hICX4KxoDu3yvnKK0eVff6JbBXwjw/exec';
 
          { createApp, ref, reactive, computed, watch, onMounted } = Vue;
 
         createApp({
             setup() {
-                const liffReady = ref(false);
+                 liffReady = ref(false);
                 const profile = ref(null);
                 const submitting = ref(false);
                 const showSuccess = ref(false);
